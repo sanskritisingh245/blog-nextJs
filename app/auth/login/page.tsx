@@ -1,62 +1,49 @@
 "use client"
-
-import { SignUpSchema } from "@/app/schemas/auth";
+import { LoginSchema } from "@/app/schemas/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
-import {zodResolver} from "@hookform/resolvers/zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import {Controller, useForm} from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 
-export default function SignUpPage(){
-    const router= useRouter();
+export default function loginPage(){
+    const router = useRouter();
     const form= useForm({
-        resolver:zodResolver(SignUpSchema),//for validating schema
-        defaultValues:{
-          email:"",
-          name:"",
-          password:"", 
-        },
-    });
-    async function onSubmit(data:z.infer<typeof SignUpSchema>){
-        await authClient.signUp.email({
-            email:data.email,
-            name:data.name,
-            password:data.password,
-            fetchOptions:{
-                    onSuccess: ()=>{ 
-                        toast.success("Logged in  successfully")
-                        router.push("/")
-                    },
-                    onError:(error)=>{
-                        toast.error(error.error.message)
+            resolver:zodResolver(LoginSchema),//for validating schema
+            defaultValues:{
+              email:"",
+              password:"", 
+            },
+        });
+        async function onSubmit(data:z.infer<typeof LoginSchema>){
+                await authClient.signIn.email({
+                    email:data.email,
+                    password:data.password,
+                    fetchOptions:{
+                        onSuccess: ()=>{
+                            toast.success("Logged in  successfully")
+                            router.push("/")
+                        },
+                        onError:(error)=>{
+                            toast.error(error.error.message)
+                        }
                     }
-                }
-        })   
-    }
-
+                })   
+            }
     return(
         <Card>
             <CardHeader>
-                <CardTitle>Sign up</CardTitle>
-                <CardDescription>Create an account to get started</CardDescription>
+                <CardTitle>Login </CardTitle>
+                <CardDescription>Login to get started right away</CardDescription>
             </CardHeader>
             <CardContent>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                     <FieldGroup className="gap-y-4">
-                        <Controller name="name" control={form.control} render={({field, fieldState})=>(
-                            <Field>
-                                <FieldLabel>Enter Name</FieldLabel>
-                                <Input aria-invalid={fieldState.invalid} placeholder="Jhon Doe" {...field}/>
-                                {fieldState.invalid && (
-                                    <FieldError errors={[fieldState.error]}/>
-                                )}
-                            </Field>
-                        )}/>
                         <Controller name="email" control={form.control} render={({field, fieldState})=>(
                             <Field>
                                 <FieldLabel>Email</FieldLabel>
@@ -75,10 +62,11 @@ export default function SignUpPage(){
                                 )}
                             </Field>
                         )}/>
-                        <Button>Sign up</Button>
+                        <Button>Login </Button>
                     </FieldGroup>
                 </form>
             </CardContent>
         </Card>
+
     )
 }

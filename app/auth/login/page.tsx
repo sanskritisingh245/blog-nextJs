@@ -6,12 +6,15 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 
 export default function loginPage(){
+    const [isPending, startTransition] = useTransition()
     const router = useRouter();
     const form= useForm({
             resolver:zodResolver(LoginSchema),//for validating schema
@@ -20,7 +23,8 @@ export default function loginPage(){
               password:"", 
             },
         });
-        async function onSubmit(data:z.infer<typeof LoginSchema>){
+        function onSubmit(data:z.infer<typeof LoginSchema>){
+            startTransition(async ()=>{
                 await authClient.signIn.email({
                     email:data.email,
                     password:data.password,
@@ -34,6 +38,7 @@ export default function loginPage(){
                         }
                     }
                 })   
+            })
             }
     return(
         <Card>
@@ -62,7 +67,15 @@ export default function loginPage(){
                                 )}
                             </Field>
                         )}/>
-                        <Button>Login </Button>
+                        <Button disabled={isPending}>{isPending ?(
+                            <>
+                                <Loader2 className="size-4 animate-spin"/>
+                                <span>Loading...</span>
+                            </>
+                            ):(
+                                <span>Login </span>
+                            )} 
+                        </Button>
                     </FieldGroup>
                 </form>
             </CardContent>
